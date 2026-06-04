@@ -1,4 +1,4 @@
-# The Lawn and Sprinkler Guys — public proposal + demo
+# The Landscape and Sprinkler Guys — public proposal + demo
 
 Static GitHub Pages site. `index.html` is the proposal; `demo/` is a showcase of the Marketing OS (approval queue + mock social feeds).
 
