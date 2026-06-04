@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Marketing OS — Live Demo · The Lawn and Sprinkler Guys</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#F6F8F4;--ink:#1C2B23;--muted:#5C6B61;--line:#E2E8DD;--green:#2D6A4F;--green-dk:#1B4332;--leaf:#40916C;--green-lt:#74C69D}
+  body{background:var(--bg);color:var(--ink);font:16px/1.6 'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:'Poppins',sans-serif}
+  header{background:rgba(246,248,244,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+  header .wm{font-family:'Poppins';font-weight:700;color:var(--green-dk);font-size:15px}
+  header a.back{font-size:13px;color:var(--muted);text-decoration:none;font-weight:600}
+  header a.back:hover{color:var(--green)}
+  .hero{max-width:1000px;margin:0 auto;padding:64px 32px 24px}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--leaf);margin-bottom:18px}
+  .hero h1{font-size:clamp(30px,5vw,48px);font-weight:800;color:var(--green-dk);line-height:1.08;margin-bottom:18px}
+  .hero p{font-size:18px;color:var(--muted);max-width:680px}
+  .flow{max-width:1000px;margin:24px auto 0;padding:0 32px;display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:14px}
+  .flow b{color:var(--green-dk)}
+  .grid{max-width:1000px;margin:36px auto 80px;padding:0 32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+  a.card{display:block;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px;box-shadow:0 14px 34px rgba(27,67,50,.08);transition:transform .18s,box-shadow .18s;color:var(--ink)}
+  a.card:hover{transform:translateY(-4px);box-shadow:0 22px 44px rgba(27,67,50,.14)}
+  a.card.feature{grid-column:1/-1;border:2px solid var(--green-lt);background:linear-gradient(120deg,#fff,#f1f8f3)}
+  .card .ico{font-size:26px;margin-bottom:12px}
+  .card h3{font-size:18px;color:var(--green-dk);margin-bottom:6px}
+  .card p{font-size:14px;color:var(--muted)}
+  .card .go{margin-top:14px;font-weight:700;color:var(--green);font-size:14px}
+  .note{max-width:1000px;margin:0 auto 60px;padding:0 32px;color:var(--muted);font-size:13px}
+  .note span{display:inline-block;background:#eef4ea;border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wm">The Lawn &amp; Sprinkler Guys · Marketing OS</div>
+  <a class="back" href="../index.html">&larr; Back to proposal</a>
+</header>
+
+<section class="hero">
+  <div class="eyebrow">See it in action</div>
+  <h1>One text from the field → a week of marketing</h1>
+  <p>This is the actual system, loaded with real Lawn &amp; Sprinkler Guys content. A crew member texts a photo and a sentence; the engine writes every post; the owner approves in one tap. Below is exactly what they'd see.</p>
+</section>
+
+<div class="flow">
+  <span><b>1.</b> Crew texts a job photo</span> ·
+  <span><b>2.</b> Engine writes 5 posts</span> ·
+  <span><b>3.</b> Owner approves</span> ·
+  <span><b>4.</b> It posts everywhere</span>
+</div>
+
+<div class="grid">
+  <a class="card feature" href="queue.html">
+    <div class="ico">🗂️</div>
+    <h3>The Approval Queue</h3>
+    <p>What the owner sees: a Draper paver-patio job that became 5 posts, plus a review reply, a new lead, and an SEO page — each in their voice, ready to approve.</p>
+    <div class="go">Open the queue →</div>
+  </a>
+  <a class="card" href="google.html"><div class="ico">🔎</div><h3>Google Business</h3><p>Local posts that show up in “near me” search.</p><div class="go">View feed →</div></a>
+  <a class="card" href="facebook.html"><div class="ico">📘</div><h3>Facebook</h3><p>Neighborly before/after posts for the community.</p><div class="go">View feed →</div></a>
+  <a class="card" href="instagram.html"><div class="ico">📸</div><h3>Instagram</h3><p>Satisfying before/after tiles, on autopilot.</p><div class="go">View feed →</div></a>
+  <a class="card" href="blog.html"><div class="ico">📝</div><h3>Blog</h3><p>SEO articles answering what homeowners google.</p><div class="go">View feed →</div></a>
+  <a class="card" href="newsletter.html"><div class="ico">✉️</div><h3>Newsletter</h3><p>Seasonal reminders to past customers.</p><div class="go">View feed →</div></a>
+</div>
+
+<div class="note"><span>📺 These are static previews of the live system. The real version runs interactively — every “Approve” fans the post out to each channel automatically. Demo content is illustrative.</span></div>
+</body>
+</html>

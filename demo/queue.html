@@ -1,0 +1,1196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<title>Marketing OS — Approval Queue</title>
+<style>
+  :root { --bg:#0e0f12; --panel:#16181d; --line:#2a2d35; --ink:#e6e7ea; --muted:#9aa0aa; --accent:#f6c000; --green:#3ec07a; --red:#e0584a; --blue:#3a8dde; }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  header.top{padding:16px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px}
+  header.top h1{font-size:16px;margin:0;font-weight:600;letter-spacing:.3px}
+  header.top .tag{color:var(--muted);font-size:12px}
+  header.top .tag a{color:var(--blue);text-decoration:none}
+  .filters{margin-left:auto;display:flex;gap:8px}
+  .filters a{color:var(--muted);text-decoration:none;padding:4px 10px;border:1px solid var(--line);border-radius:4px;font-size:12px}
+  .filters a.on{color:var(--bg);background:var(--accent);border-color:var(--accent)}
+  main{padding:24px;display:grid;gap:16px;max-width:1100px;margin:0 auto}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .card > header{border-bottom:1px solid var(--line);padding:12px 16px;background:#1b1d23;display:flex;align-items:center;gap:12px}
+  .card > header h2{font-size:13px;margin:0;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .card > header .meta{margin-left:auto;font-size:11px;color:var(--muted);font-family:ui-monospace,monospace}
+  .body{padding:16px}
+  pre{background:#0a0b0d;border:1px solid var(--line);border-radius:6px;padding:12px;overflow:auto;font-size:12px;color:#cfd2d6;max-height:420px;white-space:pre-wrap}
+  .actions{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);background:#13151a}
+  button{font:inherit;padding:6px 14px;border-radius:5px;border:1px solid var(--line);background:#22252c;color:var(--ink);cursor:pointer}
+  button.approve{background:var(--green);border-color:var(--green);color:#0a0b0d;font-weight:600}
+  button.reject{background:transparent;border-color:var(--red);color:var(--red)}
+  button.edit{background:transparent;color:var(--muted)}
+  .empty{padding:48px;text-align:center;color:var(--muted)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;background:#22252c;color:var(--muted)}
+  .pill.approved{background:var(--green);color:#0a0b0d}
+  .pill.published{background:var(--blue);color:#0a0b0d}
+  .pill.failed{background:var(--red);color:#fff}
+  .pill.rejected{background:var(--red);color:#fff}
+  .pill.pending{background:var(--accent);color:#0a0b0d}
+  .pill.processing{background:#9aa0aa;color:#0a0b0d;animation:pulse 1.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .processing-banner{padding:14px;text-align:center;color:var(--muted);font-size:13px;background:#0a0b0d;border:1px dashed var(--line);border-radius:6px;margin-bottom:12px}
+  .processing-banner .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin:0 2px;animation:bounce 1.4s ease-in-out infinite}
+  .processing-banner .dot:nth-child(2){animation-delay:.2s}
+  .processing-banner .dot:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.5}40%{transform:scale(1);opacity:1}}
+  .error-banner{padding:14px;color:#fff;background:#3d1a1a;border:1px solid var(--red);border-radius:6px;margin-bottom:12px;font-family:ui-monospace,monospace;font-size:12px}
+  .error-banner strong{color:var(--red)}
+  .meta-line{font-size:11px;color:var(--muted);font-family:ui-monospace,monospace;margin-bottom:12px}
+  .meta-line span{margin-right:12px}
+  textarea{width:100%;min-height:280px;background:#0a0b0d;color:#cfd2d6;border:1px solid var(--line);border-radius:6px;padding:12px;font:12px ui-monospace,monospace}
+
+  /* Per-channel preview cards */
+  .channels{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));margin-top:8px}
+  .channel{background:#0a0b0d;border:1px solid var(--line);border-radius:6px;padding:12px}
+  .channel .ch-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .channel .ch-name{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+  .channel .ch-len{font-size:10px;color:var(--muted);margin-left:auto;font-family:ui-monospace,monospace}
+  .channel .ch-body{font-size:13px;line-height:1.45;color:#d6d8dc;white-space:pre-wrap;max-height:220px;overflow:auto}
+  .channel .ch-tags{margin-top:8px;color:#88c4ff;font-size:11px}
+  .channel .ch-cta{margin-top:8px;display:inline-block;padding:3px 10px;border:1px solid var(--blue);color:var(--blue);font-size:11px;border-radius:99px}
+  .channel .ch-title{font-weight:600;margin-bottom:6px;color:var(--ink);font-size:13px}
+  .channel .ch-faq{margin-top:8px;font-size:11px;color:var(--muted)}
+  .channel .ch-faq strong{color:#d6d8dc}
+  .toggle-raw{margin-top:12px;color:var(--muted);font-size:11px;cursor:pointer;border:none;background:none;padding:0;text-decoration:underline}
+
+  /* Source-photos panel */
+  .source{display:flex;gap:12px;margin-bottom:14px;padding:10px;background:#0a0b0d;border:1px solid var(--line);border-radius:6px;align-items:flex-start}
+  .source .label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;flex-shrink:0;writing-mode:vertical-rl;transform:rotate(180deg);padding:4px 0}
+  .source .photos{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0}
+  .source .photos img{width:120px;height:120px;object-fit:cover;border-radius:4px;border:1px solid var(--line);display:block}
+  .source .note{flex:1;color:#d6d8dc;font-size:13px;line-height:1.5;font-style:italic}
+  .source .note .from{color:var(--muted);font-size:11px;font-style:normal;margin-bottom:4px;font-family:ui-monospace,monospace}
+</style>
+</head>
+<body data-tenant="lasg">
+<header class="top">
+  <h1>Marketing OS</h1>
+  <span class="tag">Approval Queue · tenant: <strong>lasg</strong> · <a href="index.html" target="_blank">mock feeds →</a></span>
+  <nav class="filters">
+    
+      <a href="/?tenant=lasg&status=pending" class="">pending</a>
+    
+      <a href="/?tenant=lasg&status=processing" class="">processing</a>
+    
+      <a href="/?tenant=lasg&status=approved" class="">approved</a>
+    
+      <a href="/?tenant=lasg&status=published" class="">published</a>
+    
+      <a href="/?tenant=lasg&status=failed" class="">failed</a>
+    
+      <a href="/?tenant=lasg&status=rejected" class="">rejected</a>
+    
+      <a href="/?tenant=lasg&status=all" class="on">all</a>
+    
+  </nav>
+</header>
+<main>
+<div style="max-width:1100px;margin:16px auto 0;padding:12px 16px;background:#13261a;border:1px solid #2e5a3a;border-radius:8px;color:#cfe8d6;font-size:13px">📺 <strong>Static preview.</strong> This is the operator's approval queue. In the live system, “Approve &amp; publish” fans each draft out to Google, Facebook and Instagram — <a href="index.html" style="color:#8fe3ad">see the feeds →</a></div>
+  
+  
+  <article class="card" data-id="8cc481932a7a">
+    <header>
+      <h2>landing page</h2>
+      <span class="pill pending">pending</span>
+      <span class="meta">8cc481932a7a · 2026-06-04T22:46:35.687966Z</span>
+    </header>
+    <div class="body">
+      <div class="meta-line">
+        <span>prompt: <strong>v1</strong></span>
+        <span>model: authored-demo</span>
+        
+      </div>
+
+      
+
+      
+      
+
+      
+      
+
+      
+      
+
+      
+      
+        
+        <div class="output-view">
+          <pre>{
+  "h1": "Sprinkler Repair in Salt Lake City \u2014 The Lawn and Sprinkler Guys",
+  "meta_description": "Fast, fair sprinkler repair across Salt Lake City \u2014 broken heads, leaks, valves & controllers, plus spring start-ups and fall blowouts. Call the LASG.",
+  "intro": "When a sprinkler line breaks or a zone stops working in the middle of a Salt Lake City summer, you need it fixed fast \u2014 before the lawn browns and the water bill climbs. The Lawn and Sprinkler Guys repair systems across Salt Lake City and the whole valley: broken and tilted heads, leaks, stuck valves, wiring, and controllers. Most repairs we can get to the same week, and we'll tell you straight what needs fixing and what doesn't.",
+  "sections": [
+    {
+      "h2": "What We Fix",
+      "body": "Broken, clogged, and misaligned sprinkler heads; leaking or stuck valves; cracked lines from winter freeze; faulty wiring and solenoids; and controllers that won't hold a schedule. We work on every common brand, whether or not we installed the system. If a zone won't come on or you've got a geyser in the lawn, that's us."
+    },
+    {
+      "h2": "Why Salt Lake Homeowners Call Us",
+      "body": "We answer the phone, we show up when we say we will, and we charge a fair price for honest work. We're a local valley crew \u2014 not a franchise \u2014 so the person who diagnoses your system is the person who fixes it. And because we do water-wise work all day, we'll point out easy ways to stop wasting water while we're at it."
+    },
+    {
+      "h2": "Spring Start-Ups, Fall Blowouts & Water-Wise Upgrades",
+      "body": "Sprinkler care in Utah is seasonal. We handle spring start-ups so your system wakes up without surprises, fall blowouts to clear the lines before the first freeze, and water-wise upgrades \u2014 smart controllers and drip \u2014 that cut your summer bill. Get on the schedule early; the calendar fills fast at both ends of the season."
+    }
+  ],
+  "faq": [
+    {
+      "q": "How much does sprinkler repair cost in Salt Lake City?",
+      "a": "Most common repairs \u2014 a few heads, a valve, a wiring fix \u2014 are modest and quoted up front. We'll diagnose the system and tell you the cost before we do the work, with no surprises."
+    },
+    {
+      "q": "How soon can you come out?",
+      "a": "We can get to most repairs the same week, and we prioritize active leaks and zones that are down so you're not losing water or a lawn."
+    },
+    {
+      "q": "When should I blow out my sprinklers in Utah?",
+      "a": "Before the first hard freeze \u2014 usually mid-to-late fall in the Salt Lake valley. A compressed-air blowout clears the lines so they don't crack over winter."
+    }
+  ],
+  "cta": "Need a sprinkler fixed in Salt Lake City? Call The Lawn and Sprinkler Guys at (385) 259-9337."
+}</pre>
+        </div>
+      
+
+      <button class="toggle-raw" onclick="toggleRaw('8cc481932a7a')">Show raw JSON / edit</button>
+      <div class="output-view-raw" style="display:none;margin-top:12px">
+        <pre>{
+  "h1": "Sprinkler Repair in Salt Lake City \u2014 The Lawn and Sprinkler Guys",
+  "meta_description": "Fast, fair sprinkler repair across Salt Lake City \u2014 broken heads, leaks, valves & controllers, plus spring start-ups and fall blowouts. Call the LASG.",
+  "intro": "When a sprinkler line breaks or a zone stops working in the middle of a Salt Lake City summer, you need it fixed fast \u2014 before the lawn browns and the water bill climbs. The Lawn and Sprinkler Guys repair systems across Salt Lake City and the whole valley: broken and tilted heads, leaks, stuck valves, wiring, and controllers. Most repairs we can get to the same week, and we'll tell you straight what needs fixing and what doesn't.",
+  "sections": [
+    {
+      "h2": "What We Fix",
+      "body": "Broken, clogged, and misaligned sprinkler heads; leaking or stuck valves; cracked lines from winter freeze; faulty wiring and solenoids; and controllers that won't hold a schedule. We work on every common brand, whether or not we installed the system. If a zone won't come on or you've got a geyser in the lawn, that's us."
+    },
+    {
+      "h2": "Why Salt Lake Homeowners Call Us",
+      "body": "We answer the phone, we show up when we say we will, and we charge a fair price for honest work. We're a local valley crew \u2014 not a franchise \u2014 so the person who diagnoses your system is the person who fixes it. And because we do water-wise work all day, we'll point out easy ways to stop wasting water while we're at it."
+    },
+    {
+      "h2": "Spring Start-Ups, Fall Blowouts & Water-Wise Upgrades",
+      "body": "Sprinkler care in Utah is seasonal. We handle spring start-ups so your system wakes up without surprises, fall blowouts to clear the lines before the first freeze, and water-wise upgrades \u2014 smart controllers and drip \u2014 that cut your summer bill. Get on the schedule early; the calendar fills fast at both ends of the season."
+    }
+  ],
+  "faq": [
+    {
+      "q": "How much does sprinkler repair cost in Salt Lake City?",
+      "a": "Most common repairs \u2014 a few heads, a valve, a wiring fix \u2014 are modest and quoted up front. We'll diagnose the system and tell you the cost before we do the work, with no surprises."
+    },
+    {
+      "q": "How soon can you come out?",
+      "a": "We can get to most repairs the same week, and we prioritize active leaks and zones that are down so you're not losing water or a lawn."
+    },
+    {
+      "q": "When should I blow out my sprinklers in Utah?",
+      "a": "Before the first hard freeze \u2014 usually mid-to-late fall in the Salt Lake valley. A compressed-air blowout clears the lines so they don't crack over winter."
+    }
+  ],
+  "cta": "Need a sprinkler fixed in Salt Lake City? Call The Lawn and Sprinkler Guys at (385) 259-9337."
+}</pre>
+      </div>
+      <textarea class="output-edit" style="display:none;margin-top:12px">{
+  "h1": "Sprinkler Repair in Salt Lake City \u2014 The Lawn and Sprinkler Guys",
+  "meta_description": "Fast, fair sprinkler repair across Salt Lake City \u2014 broken heads, leaks, valves & controllers, plus spring start-ups and fall blowouts. Call the LASG.",
+  "intro": "When a sprinkler line breaks or a zone stops working in the middle of a Salt Lake City summer, you need it fixed fast \u2014 before the lawn browns and the water bill climbs. The Lawn and Sprinkler Guys repair systems across Salt Lake City and the whole valley: broken and tilted heads, leaks, stuck valves, wiring, and controllers. Most repairs we can get to the same week, and we'll tell you straight what needs fixing and what doesn't.",
+  "sections": [
+    {
+      "h2": "What We Fix",
+      "body": "Broken, clogged, and misaligned sprinkler heads; leaking or stuck valves; cracked lines from winter freeze; faulty wiring and solenoids; and controllers that won't hold a schedule. We work on every common brand, whether or not we installed the system. If a zone won't come on or you've got a geyser in the lawn, that's us."
+    },
+    {
+      "h2": "Why Salt Lake Homeowners Call Us",
+      "body": "We answer the phone, we show up when we say we will, and we charge a fair price for honest work. We're a local valley crew \u2014 not a franchise \u2014 so the person who diagnoses your system is the person who fixes it. And because we do water-wise work all day, we'll point out easy ways to stop wasting water while we're at it."
+    },
+    {
+      "h2": "Spring Start-Ups, Fall Blowouts & Water-Wise Upgrades",
+      "body": "Sprinkler care in Utah is seasonal. We handle spring start-ups so your system wakes up without surprises, fall blowouts to clear the lines before the first freeze, and water-wise upgrades \u2014 smart controllers and drip \u2014 that cut your summer bill. Get on the schedule early; the calendar fills fast at both ends of the season."
+    }
+  ],
+  "faq": [
+    {
+      "q": "How much does sprinkler repair cost in Salt Lake City?",
+      "a": "Most common repairs \u2014 a few heads, a valve, a wiring fix \u2014 are modest and quoted up front. We'll diagnose the system and tell you the cost before we do the work, with no surprises."
+    },
+    {
+      "q": "How soon can you come out?",
+      "a": "We can get to most repairs the same week, and we prioritize active leaks and zones that are down so you're not losing water or a lawn."
+    },
+    {
+      "q": "When should I blow out my sprinklers in Utah?",
+      "a": "Before the first hard freeze \u2014 usually mid-to-late fall in the Salt Lake valley. A compressed-air blowout clears the lines so they don't crack over winter."
+    }
+  ],
+  "cta": "Need a sprinkler fixed in Salt Lake City? Call The Lawn and Sprinkler Guys at (385) 259-9337."
+}</textarea>
+
+      <details style="margin-top:14px">
+        <summary style="cursor:pointer;color:#9aa0aa;margin-bottom:8px">Input payload</summary>
+        <pre>{
+  "division": "irrigation",
+  "service_slug": "sprinkler-repair",
+  "geo": "Salt Lake City",
+  "keywords": [
+    "sprinkler repair salt lake city",
+    "sprinkler blowout salt lake city",
+    "sprinkler winterization utah"
+  ]
+}</pre>
+      </details>
+      <details>
+        <summary style="cursor:pointer;color:#9aa0aa;margin-bottom:8px">Audit log</summary>
+        <pre class="audit-log" data-id="8cc481932a7a">click to load…</pre>
+      </details>
+    </div>
+    <div class="actions">
+      <button class="edit" onclick="toggleEdit('8cc481932a7a')">Edit</button>
+      <button class="save" style="display:none" onclick="saveEdit('8cc481932a7a')">Save edit</button>
+      <span style="flex:1"></span>
+      <button class="reject" onclick="act('8cc481932a7a','reject')">Reject</button>
+      <button class="approve" onclick="act('8cc481932a7a','approve')">Approve & publish</button>
+    </div>
+  </article>
+  
+  <article class="card" data-id="186debb24838">
+    <header>
+      <h2>inbound triage</h2>
+      <span class="pill pending">pending</span>
+      <span class="meta">186debb24838 · 2026-06-04T22:46:35.686782Z</span>
+    </header>
+    <div class="body">
+      <div class="meta-line">
+        <span>prompt: <strong>v1</strong></span>
+        <span>model: authored-demo</span>
+        
+      </div>
+
+      
+
+      
+      
+
+      
+      
+
+      
+      
+
+      
+      
+        
+        <div class="output-view">
+          <pre>{
+  "classification": "estimate_request",
+  "confidence": 0.93,
+  "urgency": "warm",
+  "extracted": {
+    "name": "Dave Whitaker",
+    "company": "",
+    "phone": "",
+    "email": "",
+    "project_type": "Lawn-to-xeriscape conversion + drip irrigation update",
+    "location": "Cottonwood Heights",
+    "size": "",
+    "timeline": "",
+    "budget_hint": "Wants to lower summer water bill",
+    "named_parties": []
+  },
+  "slack_alert": "\ud83d\udfe2 New estimate request \u2014 Dave Whitaker (Cottonwood Heights). Wants to convert lawn to xeriscape + move sprinklers to drip to cut summer water use. Strong water-wise lead. Next: schedule a site visit.",
+  "auto_reply": {
+    "subject": "Thanks, Dave \u2014 let's get you a quote",
+    "body": "Hi Dave,\n\nThanks for reaching out! Cutting that summer water bill is right in our wheelhouse \u2014 converting thirsty lawn to a water-wise design and moving the right zones to drip is one of the best upgrades you can make in Utah.\n\nWe'll reach out within one business day to set up a quick visit and get you an estimate. If you'd rather talk sooner, give us a call at (385) 259-9337.\n\n\u2014 The Lawn and Sprinkler Guys"
+  },
+  "next_action": "Call Dave within 24 hrs to schedule a site visit in Cottonwood Heights."
+}</pre>
+        </div>
+      
+
+      <button class="toggle-raw" onclick="toggleRaw('186debb24838')">Show raw JSON / edit</button>
+      <div class="output-view-raw" style="display:none;margin-top:12px">
+        <pre>{
+  "classification": "estimate_request",
+  "confidence": 0.93,
+  "urgency": "warm",
+  "extracted": {
+    "name": "Dave Whitaker",
+    "company": "",
+    "phone": "",
+    "email": "",
+    "project_type": "Lawn-to-xeriscape conversion + drip irrigation update",
+    "location": "Cottonwood Heights",
+    "size": "",
+    "timeline": "",
+    "budget_hint": "Wants to lower summer water bill",
+    "named_parties": []
+  },
+  "slack_alert": "\ud83d\udfe2 New estimate request \u2014 Dave Whitaker (Cottonwood Heights). Wants to convert lawn to xeriscape + move sprinklers to drip to cut summer water use. Strong water-wise lead. Next: schedule a site visit.",
+  "auto_reply": {
+    "subject": "Thanks, Dave \u2014 let's get you a quote",
+    "body": "Hi Dave,\n\nThanks for reaching out! Cutting that summer water bill is right in our wheelhouse \u2014 converting thirsty lawn to a water-wise design and moving the right zones to drip is one of the best upgrades you can make in Utah.\n\nWe'll reach out within one business day to set up a quick visit and get you an estimate. If you'd rather talk sooner, give us a call at (385) 259-9337.\n\n\u2014 The Lawn and Sprinkler Guys"
+  },
+  "next_action": "Call Dave within 24 hrs to schedule a site visit in Cottonwood Heights."
+}</pre>
+      </div>
+      <textarea class="output-edit" style="display:none;margin-top:12px">{
+  "classification": "estimate_request",
+  "confidence": 0.93,
+  "urgency": "warm",
+  "extracted": {
+    "name": "Dave Whitaker",
+    "company": "",
+    "phone": "",
+    "email": "",
+    "project_type": "Lawn-to-xeriscape conversion + drip irrigation update",
+    "location": "Cottonwood Heights",
+    "size": "",
+    "timeline": "",
+    "budget_hint": "Wants to lower summer water bill",
+    "named_parties": []
+  },
+  "slack_alert": "\ud83d\udfe2 New estimate request \u2014 Dave Whitaker (Cottonwood Heights). Wants to convert lawn to xeriscape + move sprinklers to drip to cut summer water use. Strong water-wise lead. Next: schedule a site visit.",
+  "auto_reply": {
+    "subject": "Thanks, Dave \u2014 let's get you a quote",
+    "body": "Hi Dave,\n\nThanks for reaching out! Cutting that summer water bill is right in our wheelhouse \u2014 converting thirsty lawn to a water-wise design and moving the right zones to drip is one of the best upgrades you can make in Utah.\n\nWe'll reach out within one business day to set up a quick visit and get you an estimate. If you'd rather talk sooner, give us a call at (385) 259-9337.\n\n\u2014 The Lawn and Sprinkler Guys"
+  },
+  "next_action": "Call Dave within 24 hrs to schedule a site visit in Cottonwood Heights."
+}</textarea>
+
+      <details style="margin-top:14px">
+        <summary style="cursor:pointer;color:#9aa0aa;margin-bottom:8px">Input payload</summary>
+        <pre>{
+  "source": "website contact form",
+  "sender": "Dave Whitaker",
+  "message": "Hi \u2014 we're in Cottonwood Heights and trying to cut our summer water bill. We'd like to replace some of our lawn with a xeriscape design and update the sprinklers to drip where it makes sense. Can someone come take a look and give us an estimate?"
+}</pre>
+      </details>
+      <details>
+        <summary style="cursor:pointer;color:#9aa0aa;margin-bottom:8px">Audit log</summary>
+        <pre class="audit-log" data-id="186debb24838">click to load…</pre>
+      </details>
+    </div>
+    <div class="actions">
+      <button class="edit" onclick="toggleEdit('186debb24838')">Edit</button>
+      <button class="save" style="display:none" onclick="saveEdit('186debb24838')">Save edit</button>
+      <span style="flex:1"></span>
+      <button class="reject" onclick="act('186debb24838','reject')">Reject</button>
+      <button class="approve" onclick="act('186debb24838','approve')">Approve & publish</button>
+    </div>
+  </article>
+  
+  <article class="card" data-id="e35d622f8ad7">
+    <header>
+      <h2>review response</h2>
+      <span class="pill pending">pending</span>
+      <span class="meta">e35d622f8ad7 · 2026-06-04T22:46:35.685547Z</span>
+    </header>
+    <div class="body">
+      <div class="meta-line">
+        <span>prompt: <strong>v1</strong></span>
+        <span>model: authored-demo</span>
+        
+      </div>
+
+      
+
+      
+      
+
+      
+      
+
+      
+      
+
+      
+      
+        
+        <div class="output-view">
+          <pre>{
+  "tier": "3_4_star",
+  "response": "Thank you, Megan \u2014 we really appreciate the honest feedback, and we're glad the drip system is finally doing what it should. You're right that scheduling ran a little long, and that's on us to tighten up; we're adding to the crew this season so the calendar moves faster. If anything ever needs another look, just call the office and ask for the crew that did your yard. Thanks for trusting us with it. \u2014 The Lawn and Sprinkler Guys",
+  "internal_note": "4-star: quality praised, scheduling lag noted. No escalation needed \u2014 log the scheduling complaint. Suggest a follow-up text in ~2 weeks to confirm the drip system is still running clean.",
+  "escalate": false
+}</pre>
+        </div>
+      
+
+      <button class="toggle-raw" onclick="toggleRaw('e35d622f8ad7')">Show raw JSON / edit</button>
+      <div class="output-view-raw" style="display:none;margin-top:12px">
+        <pre>{
+  "tier": "3_4_star",
+  "response": "Thank you, Megan \u2014 we really appreciate the honest feedback, and we're glad the drip system is finally doing what it should. You're right that scheduling ran a little long, and that's on us to tighten up; we're adding to the crew this season so the calendar moves faster. If anything ever needs another look, just call the office and ask for the crew that did your yard. Thanks for trusting us with it. \u2014 The Lawn and Sprinkler Guys",
+  "internal_note": "4-star: quality praised, scheduling lag noted. No escalation needed \u2014 log the scheduling complaint. Suggest a follow-up text in ~2 weeks to confirm the drip system is still running clean.",
+  "escalate": false
+}</pre>
+      </div>
+      <textarea class="output-edit" style="display:none;margin-top:12px">{
+  "tier": "3_4_star",
+  "response": "Thank you, Megan \u2014 we really appreciate the honest feedback, and we're glad the drip system is finally doing what it should. You're right that scheduling ran a little long, and that's on us to tighten up; we're adding to the crew this season so the calendar moves faster. If anything ever needs another look, just call the office and ask for the crew that did your yard. Thanks for trusting us with it. \u2014 The Lawn and Sprinkler Guys",
+  "internal_note": "4-star: quality praised, scheduling lag noted. No escalation needed \u2014 log the scheduling complaint. Suggest a follow-up text in ~2 weeks to confirm the drip system is still running clean.",
+  "escalate": false
+}</textarea>
+
+      <details style="margin-top:14px">
+        <summary style="cursor:pointer;color:#9aa0aa;margin-bottom:8px">Input payload</summary>
+        <pre>{
+  "source": "gbp",
+  "reviewer_name": "Megan S.",
+  "rating": 4,
+  "date": "2026-05-28",
+  "text": "Good work overall \u2014 they fixed the drip system our last company kept getting wrong, and the yard looks great now. Scheduling took a couple of days longer than I'd hoped, but the quality was worth it. Would use them again."
+}</pre>
+      </details>
+      <details>
+        <summary style="cursor:pointer;color:#9aa0aa;margin-bottom:8px">Audit log</summary>
+        <pre class="audit-log" data-id="e35d622f8ad7">click to load…</pre>
+      </details>
+    </div>
+    <div class="actions">
+      <button class="edit" onclick="toggleEdit('e35d622f8ad7')">Edit</button>
+      <button class="save" style="display:none" onclick="saveEdit('e35d622f8ad7')">Save edit</button>
+      <span style="flex:1"></span>
+      <button class="reject" onclick="act('e35d622f8ad7','reject')">Reject</button>
+      <button class="approve" onclick="act('e35d622f8ad7','approve')">Approve & publish</button>
+    </div>
+  </article>
+  
+  <article class="card" data-id="8cfb876d0bbe">
+    <header>
+      <h2>intake to post</h2>
+      <span class="pill published">published</span>
+      <span class="meta">8cfb876d0bbe · 2026-06-04T22:46:35.684220Z</span>
+    </header>
+    <div class="body">
+      <div class="meta-line">
+        <span>prompt: <strong>v1</strong></span>
+        <span>model: authored-demo</span>
+        
+      </div>
+
+      
+
+      
+      
+
+      
+      
+
+      
+      
+        <div class="source">
+          
+          
+          <div class="note">
+            <div class="from">FROM seeded crew </div>
+            “Out in Holladay today upgrading a homeowner to a wifi smart controller and putting the flower beds on drip. Their old timer was watering the lawn at noon — now it waters early, adjusts to the weather on its own, and the beds get a slow drink at the roots instead of soaking the fence. Should cut their summer water bill noticeably.”
+          </div>
+          
+        </div>
+      
+
+      
+      
+        <div class="channels">
+          
+            
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">gbp</span>
+                
+                <span class="ch-len">381 chars</span>
+              </div>
+              
+              <div class="ch-body">Spent the morning in Holladay helping a homeowner cut their summer water bill. We swapped their old timer for a wifi smart controller and put the flower beds on drip. Now the system waters early, adjusts to the weather on its own, and the beds get a slow soak right at the roots instead of spraying the fence. Small upgrade, real savings. Ask us about smart watering for your yard.</div>
+              
+              <span class="ch-cta">Learn more</span>
+              
+            </div>
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">instagram</span>
+                
+                <span class="ch-len">131 chars</span>
+              </div>
+              
+              <div class="ch-body">Smarter watering in Holladay 📲 Wifi controller + drip on the beds = water early, skip the rainy days, soak the roots not the fence.</div>
+              <div class="ch-tags">#waterwise #utahlandscaping #saltlakevalley #sprinklerrepair #xeriscape</div>
+              
+              
+            </div>
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">facebook</span>
+                
+                <span class="ch-len">339 chars</span>
+              </div>
+              
+              <div class="ch-body">Watering your lawn at noon in July? Your water bill feels it. 💧 We set up a Holladay homeowner with a wifi smart controller and drip lines for the flower beds today — it waters early, skips the rain days on its own, and sends water to the roots instead of the sidewalk. One of the easiest upgrades to cut summer water use. Ask us about it.</div>
+              
+              
+              
+            </div>
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">blog</span>
+                
+                <span class="ch-len">783 chars</span>
+              </div>
+              <div class="ch-title">Cut Your Summer Water Bill in Holladay: Smart Controllers + Drip</div>
+              <div class="ch-body">Summer is when Utah water bills spike — and a surprising amount of that water never does your yard any good. It evaporates off a midday lawn, runs onto the sidewalk, or soaks the fence instead of the flower bed. Two upgrades fix most of that: a smart controller and drip irrigation where it makes sense.
+
+A wifi smart controller waters in the early morning, automatically dials back when the weather is cool or wet, and lets you tweak everything from your phone. Drip irrigation delivers water slowly and directly to the roots of beds, shrubs, and gardens — almost none is lost to evaporation or overspray. Together they keep things green while cutting the water you're paying for. For a Holladay homeowner this week, it was a one-morning upgrade with savings they'll see all summer.</div>
+              
+              
+              
+                <div class="ch-faq">3 FAQs · expand below for full</div>
+              
+            </div>
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">newsletter</span>
+                
+                <span class="ch-len">239 chars</span>
+              </div>
+              
+              <div class="ch-body">Water-wise upgrades are picking up as the temps climb — did a Holladay smart-controller + drip job today. Worth reminding folks that several local water districts offer smart-controller rebates; it's an easy yes for customers on the fence.</div>
+              
+              
+              
+            </div>
+            
+          
+        </div>
+      
+
+      <button class="toggle-raw" onclick="toggleRaw('8cfb876d0bbe')">Show raw JSON / edit</button>
+      <div class="output-view-raw" style="display:none;margin-top:12px">
+        <pre>{
+  "division": "irrigation",
+  "gbp": {
+    "post": "Spent the morning in Holladay helping a homeowner cut their summer water bill. We swapped their old timer for a wifi smart controller and put the flower beds on drip. Now the system waters early, adjusts to the weather on its own, and the beds get a slow soak right at the roots instead of spraying the fence. Small upgrade, real savings. Ask us about smart watering for your yard.",
+    "cta": "Learn more"
+  },
+  "facebook": {
+    "post": "Watering your lawn at noon in July? Your water bill feels it. \ud83d\udca7 We set up a Holladay homeowner with a wifi smart controller and drip lines for the flower beds today \u2014 it waters early, skips the rain days on its own, and sends water to the roots instead of the sidewalk. One of the easiest upgrades to cut summer water use. Ask us about it."
+  },
+  "instagram": {
+    "caption": "Smarter watering in Holladay \ud83d\udcf2 Wifi controller + drip on the beds = water early, skip the rainy days, soak the roots not the fence.",
+    "hashtags": [
+      "#waterwise",
+      "#utahlandscaping",
+      "#saltlakevalley",
+      "#sprinklerrepair",
+      "#xeriscape"
+    ]
+  },
+  "blog": {
+    "title": "Cut Your Summer Water Bill in Holladay: Smart Controllers + Drip",
+    "body": "Summer is when Utah water bills spike \u2014 and a surprising amount of that water never does your yard any good. It evaporates off a midday lawn, runs onto the sidewalk, or soaks the fence instead of the flower bed. Two upgrades fix most of that: a smart controller and drip irrigation where it makes sense.\n\nA wifi smart controller waters in the early morning, automatically dials back when the weather is cool or wet, and lets you tweak everything from your phone. Drip irrigation delivers water slowly and directly to the roots of beds, shrubs, and gardens \u2014 almost none is lost to evaporation or overspray. Together they keep things green while cutting the water you're paying for. For a Holladay homeowner this week, it was a one-morning upgrade with savings they'll see all summer.",
+    "faq": [
+      {
+        "q": "What's the best time to water in a Utah summer?",
+        "a": "Early morning \u2014 generally before about 9 a.m. It minimizes evaporation and wind loss and lets the lawn dry during the day, which is healthier than evening watering."
+      },
+      {
+        "q": "What is a smart controller?",
+        "a": "A wifi-connected sprinkler timer that adjusts watering based on local weather and season, and that you can control from an app. Many Utah water districts even offer rebates for installing one."
+      },
+      {
+        "q": "How much water can drip irrigation save?",
+        "a": "Drip is dramatically more efficient than spray for beds and gardens because it targets the roots. For the right zones it's one of the biggest water-savers we can install."
+      }
+    ]
+  },
+  "newsletter": {
+    "blurb": "Water-wise upgrades are picking up as the temps climb \u2014 did a Holladay smart-controller + drip job today. Worth reminding folks that several local water districts offer smart-controller rebates; it's an easy yes for customers on the fence."
+  }
+}</pre>
+      </div>
+      <textarea class="output-edit" style="display:none;margin-top:12px">{
+  "division": "irrigation",
+  "gbp": {
+    "post": "Spent the morning in Holladay helping a homeowner cut their summer water bill. We swapped their old timer for a wifi smart controller and put the flower beds on drip. Now the system waters early, adjusts to the weather on its own, and the beds get a slow soak right at the roots instead of spraying the fence. Small upgrade, real savings. Ask us about smart watering for your yard.",
+    "cta": "Learn more"
+  },
+  "facebook": {
+    "post": "Watering your lawn at noon in July? Your water bill feels it. \ud83d\udca7 We set up a Holladay homeowner with a wifi smart controller and drip lines for the flower beds today \u2014 it waters early, skips the rain days on its own, and sends water to the roots instead of the sidewalk. One of the easiest upgrades to cut summer water use. Ask us about it."
+  },
+  "instagram": {
+    "caption": "Smarter watering in Holladay \ud83d\udcf2 Wifi controller + drip on the beds = water early, skip the rainy days, soak the roots not the fence.",
+    "hashtags": [
+      "#waterwise",
+      "#utahlandscaping",
+      "#saltlakevalley",
+      "#sprinklerrepair",
+      "#xeriscape"
+    ]
+  },
+  "blog": {
+    "title": "Cut Your Summer Water Bill in Holladay: Smart Controllers + Drip",
+    "body": "Summer is when Utah water bills spike \u2014 and a surprising amount of that water never does your yard any good. It evaporates off a midday lawn, runs onto the sidewalk, or soaks the fence instead of the flower bed. Two upgrades fix most of that: a smart controller and drip irrigation where it makes sense.\n\nA wifi smart controller waters in the early morning, automatically dials back when the weather is cool or wet, and lets you tweak everything from your phone. Drip irrigation delivers water slowly and directly to the roots of beds, shrubs, and gardens \u2014 almost none is lost to evaporation or overspray. Together they keep things green while cutting the water you're paying for. For a Holladay homeowner this week, it was a one-morning upgrade with savings they'll see all summer.",
+    "faq": [
+      {
+        "q": "What's the best time to water in a Utah summer?",
+        "a": "Early morning \u2014 generally before about 9 a.m. It minimizes evaporation and wind loss and lets the lawn dry during the day, which is healthier than evening watering."
+      },
+      {
+        "q": "What is a smart controller?",
+        "a": "A wifi-connected sprinkler timer that adjusts watering based on local weather and season, and that you can control from an app. Many Utah water districts even offer rebates for installing one."
+      },
+      {
+        "q": "How much water can drip irrigation save?",
+        "a": "Drip is dramatically more efficient than spray for beds and gardens because it targets the roots. For the right zones it's one of the biggest water-savers we can install."
+      }
+    ]
+  },
+  "newsletter": {
+    "blurb": "Water-wise upgrades are picking up as the temps climb \u2014 did a Holladay smart-controller + drip job today. Worth reminding folks that several local water districts offer smart-controller rebates; it's an easy yes for customers on the fence."
+  }
+}</textarea>
+
+      <details style="margin-top:14px">
+        <summary style="cursor:pointer;color:#9aa0aa;margin-bottom:8px">Input payload</summary>
+        <pre>{
+  "subject": "Holladay \u2014 Smart Controller + Drip Upgrade",
+  "location": "Holladay, Salt Lake County",
+  "division_hint": "irrigation",
+  "note": "Out in Holladay today upgrading a homeowner to a wifi smart controller and putting the flower beds on drip. Their old timer was watering the lawn at noon \u2014 now it waters early, adjusts to the weather on its own, and the beds get a slow drink at the roots instead of soaking the fence. Should cut their summer water bill noticeably.",
+  "photos": [
+    "A wifi sprinkler controller mounted in a garage, a smartphone app open in the foreground showing the watering schedule",
+    "Drip emitters tucked into a mulched flower bed, water beading at the base of young perennials"
+  ],
+  "sender": "seeded crew"
+}</pre>
+      </details>
+      <details>
+        <summary style="cursor:pointer;color:#9aa0aa;margin-bottom:8px">Audit log</summary>
+        <pre class="audit-log" data-id="8cfb876d0bbe">click to load…</pre>
+      </details>
+    </div>
+    <div class="actions">
+      <button class="edit" onclick="toggleEdit('8cfb876d0bbe')">Edit</button>
+      <button class="save" style="display:none" onclick="saveEdit('8cfb876d0bbe')">Save edit</button>
+      <span style="flex:1"></span>
+      <button class="reject" onclick="act('8cfb876d0bbe','reject')">Reject</button>
+      <button class="approve" onclick="act('8cfb876d0bbe','approve')">Approve & publish</button>
+    </div>
+  </article>
+  
+  <article class="card" data-id="239b8bea545a">
+    <header>
+      <h2>intake to post</h2>
+      <span class="pill pending">pending</span>
+      <span class="meta">239b8bea545a · 2026-06-04T22:46:35.683048Z</span>
+    </header>
+    <div class="body">
+      <div class="meta-line">
+        <span>prompt: <strong>v1</strong></span>
+        <span>model: authored-demo</span>
+        
+      </div>
+
+      
+
+      
+      
+
+      
+      
+
+      
+      
+        <div class="source">
+          
+          
+          <div class="note">
+            <div class="from">FROM seeded crew </div>
+            “Wrapped a paver patio in Draper today. The homeowner wanted less lawn to water, so we pulled the grass along the south fence and put in a drip-fed xeriscape strip — decorative rock, a few native shrubs, clean steel edging. Patio turned out crisp and they've already got the fire pit going.”
+          </div>
+          
+        </div>
+      
+
+      
+      
+        <div class="channels">
+          
+            
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">gbp</span>
+                
+                <span class="ch-len">404 chars</span>
+              </div>
+              
+              <div class="ch-body">New paver patio in Draper — and a little less lawn to water. This homeowner wanted a space they'd actually use plus a lower water bill, so we built a clean paver patio and converted the strip along the fence to a drip-fed xeriscape with decorative rock and native plants. Less mowing, less watering, more backyard. If you're thinking about a patio or going water-wise in Draper, we'd love to take a look.</div>
+              
+              <span class="ch-cta">Get a free estimate</span>
+              
+            </div>
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">instagram</span>
+                
+                <span class="ch-len">123 chars</span>
+              </div>
+              
+              <div class="ch-body">Draper backyard glow-up ✨ Paver patio in, thirsty lawn out, water-wise garden along the fence. Less to water, more to love.</div>
+              <div class="ch-tags">#paverpatio #xeriscape #beforeandafter #utahlandscaping #saltlakevalley #waterwise</div>
+              
+              
+            </div>
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">facebook</span>
+                
+                <span class="ch-len">312 chars</span>
+              </div>
+              
+              <div class="ch-body">Before: a strip of thirsty grass nobody used. After: a paver patio with a fire pit and a water-wise garden along the fence. 🔥 This Draper homeowner wanted lower water bills and a backyard they'd actually live in — so we gave them both. Swipe-worthy, if we do say so. Thinking about your own backyard? Let's talk.</div>
+              
+              
+              
+            </div>
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">blog</span>
+                
+                <span class="ch-len">784 chars</span>
+              </div>
+              <div class="ch-title">Paver Patio + Xeriscape in Draper: A Backyard That Costs Less to Water</div>
+              <div class="ch-body">One of the most popular projects we're doing right now in Draper and across the Salt Lake valley is also one of the smartest: trading a rarely-used strip of lawn for a paver patio and a water-wise garden. You get a space you'll actually use, and your water bill goes down instead of up every summer.
+
+On this project we laid a paver patio with tight, level joints built to handle Utah's freeze-thaw, then converted the strip along the fence to a drip-fed xeriscape — decorative rock, a handful of hardy native shrubs, and clean steel edging to keep it crisp. Pavers hold up to our winters far better than poured concrete (no big cracks), and a drip-irrigated native bed uses a fraction of the water a lawn does while looking good year-round. Less mowing, less watering, more backyard.</div>
+              
+              
+              
+                <div class="ch-faq">3 FAQs · expand below for full</div>
+              
+            </div>
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">newsletter</span>
+                
+                <span class="ch-len">264 chars</span>
+              </div>
+              
+              <div class="ch-body">Patio season is here. The crew wrapped a sharp paver patio + xeriscape conversion in Draper this week — exactly the 'use less water, enjoy the yard more' combo more and more homeowners are asking for. Great before/after photos in the shared folder for the socials.</div>
+              
+              
+              
+            </div>
+            
+          
+        </div>
+      
+
+      <button class="toggle-raw" onclick="toggleRaw('239b8bea545a')">Show raw JSON / edit</button>
+      <div class="output-view-raw" style="display:none;margin-top:12px">
+        <pre>{
+  "division": "landscaping",
+  "gbp": {
+    "post": "New paver patio in Draper \u2014 and a little less lawn to water. This homeowner wanted a space they'd actually use plus a lower water bill, so we built a clean paver patio and converted the strip along the fence to a drip-fed xeriscape with decorative rock and native plants. Less mowing, less watering, more backyard. If you're thinking about a patio or going water-wise in Draper, we'd love to take a look.",
+    "cta": "Get a free estimate"
+  },
+  "facebook": {
+    "post": "Before: a strip of thirsty grass nobody used. After: a paver patio with a fire pit and a water-wise garden along the fence. \ud83d\udd25 This Draper homeowner wanted lower water bills and a backyard they'd actually live in \u2014 so we gave them both. Swipe-worthy, if we do say so. Thinking about your own backyard? Let's talk."
+  },
+  "instagram": {
+    "caption": "Draper backyard glow-up \u2728 Paver patio in, thirsty lawn out, water-wise garden along the fence. Less to water, more to love.",
+    "hashtags": [
+      "#paverpatio",
+      "#xeriscape",
+      "#beforeandafter",
+      "#utahlandscaping",
+      "#saltlakevalley",
+      "#waterwise"
+    ]
+  },
+  "blog": {
+    "title": "Paver Patio + Xeriscape in Draper: A Backyard That Costs Less to Water",
+    "body": "One of the most popular projects we're doing right now in Draper and across the Salt Lake valley is also one of the smartest: trading a rarely-used strip of lawn for a paver patio and a water-wise garden. You get a space you'll actually use, and your water bill goes down instead of up every summer.\n\nOn this project we laid a paver patio with tight, level joints built to handle Utah's freeze-thaw, then converted the strip along the fence to a drip-fed xeriscape \u2014 decorative rock, a handful of hardy native shrubs, and clean steel edging to keep it crisp. Pavers hold up to our winters far better than poured concrete (no big cracks), and a drip-irrigated native bed uses a fraction of the water a lawn does while looking good year-round. Less mowing, less watering, more backyard.",
+    "faq": [
+      {
+        "q": "Is xeriscaping really worth it in Utah?",
+        "a": "For most homeowners, yes. Utah is one of the driest states, and converting even part of a lawn to water-wise landscaping can noticeably cut summer water use while staying green and tidy."
+      },
+      {
+        "q": "Do paver patios crack in Utah winters?",
+        "a": "Properly installed pavers handle freeze-thaw much better than poured concrete \u2014 individual pavers flex slightly and can be lifted and reset if needed, so you don't get a big cracked slab."
+      },
+      {
+        "q": "How much of my lawn should I replace?",
+        "a": "Start with the spots that are hard to water or rarely used \u2014 park strips, side yards, slopes. We'll walk the yard and suggest where you'll get the most savings for the look you want."
+      }
+    ]
+  },
+  "newsletter": {
+    "blurb": "Patio season is here. The crew wrapped a sharp paver patio + xeriscape conversion in Draper this week \u2014 exactly the 'use less water, enjoy the yard more' combo more and more homeowners are asking for. Great before/after photos in the shared folder for the socials."
+  }
+}</pre>
+      </div>
+      <textarea class="output-edit" style="display:none;margin-top:12px">{
+  "division": "landscaping",
+  "gbp": {
+    "post": "New paver patio in Draper \u2014 and a little less lawn to water. This homeowner wanted a space they'd actually use plus a lower water bill, so we built a clean paver patio and converted the strip along the fence to a drip-fed xeriscape with decorative rock and native plants. Less mowing, less watering, more backyard. If you're thinking about a patio or going water-wise in Draper, we'd love to take a look.",
+    "cta": "Get a free estimate"
+  },
+  "facebook": {
+    "post": "Before: a strip of thirsty grass nobody used. After: a paver patio with a fire pit and a water-wise garden along the fence. \ud83d\udd25 This Draper homeowner wanted lower water bills and a backyard they'd actually live in \u2014 so we gave them both. Swipe-worthy, if we do say so. Thinking about your own backyard? Let's talk."
+  },
+  "instagram": {
+    "caption": "Draper backyard glow-up \u2728 Paver patio in, thirsty lawn out, water-wise garden along the fence. Less to water, more to love.",
+    "hashtags": [
+      "#paverpatio",
+      "#xeriscape",
+      "#beforeandafter",
+      "#utahlandscaping",
+      "#saltlakevalley",
+      "#waterwise"
+    ]
+  },
+  "blog": {
+    "title": "Paver Patio + Xeriscape in Draper: A Backyard That Costs Less to Water",
+    "body": "One of the most popular projects we're doing right now in Draper and across the Salt Lake valley is also one of the smartest: trading a rarely-used strip of lawn for a paver patio and a water-wise garden. You get a space you'll actually use, and your water bill goes down instead of up every summer.\n\nOn this project we laid a paver patio with tight, level joints built to handle Utah's freeze-thaw, then converted the strip along the fence to a drip-fed xeriscape \u2014 decorative rock, a handful of hardy native shrubs, and clean steel edging to keep it crisp. Pavers hold up to our winters far better than poured concrete (no big cracks), and a drip-irrigated native bed uses a fraction of the water a lawn does while looking good year-round. Less mowing, less watering, more backyard.",
+    "faq": [
+      {
+        "q": "Is xeriscaping really worth it in Utah?",
+        "a": "For most homeowners, yes. Utah is one of the driest states, and converting even part of a lawn to water-wise landscaping can noticeably cut summer water use while staying green and tidy."
+      },
+      {
+        "q": "Do paver patios crack in Utah winters?",
+        "a": "Properly installed pavers handle freeze-thaw much better than poured concrete \u2014 individual pavers flex slightly and can be lifted and reset if needed, so you don't get a big cracked slab."
+      },
+      {
+        "q": "How much of my lawn should I replace?",
+        "a": "Start with the spots that are hard to water or rarely used \u2014 park strips, side yards, slopes. We'll walk the yard and suggest where you'll get the most savings for the look you want."
+      }
+    ]
+  },
+  "newsletter": {
+    "blurb": "Patio season is here. The crew wrapped a sharp paver patio + xeriscape conversion in Draper this week \u2014 exactly the 'use less water, enjoy the yard more' combo more and more homeowners are asking for. Great before/after photos in the shared folder for the socials."
+  }
+}</textarea>
+
+      <details style="margin-top:14px">
+        <summary style="cursor:pointer;color:#9aa0aa;margin-bottom:8px">Input payload</summary>
+        <pre>{
+  "subject": "Draper \u2014 Paver Patio + Xeriscape Strip",
+  "location": "Draper, Salt Lake County",
+  "division_hint": "landscaping",
+  "note": "Wrapped a paver patio in Draper today. The homeowner wanted less lawn to water, so we pulled the grass along the south fence and put in a drip-fed xeriscape strip \u2014 decorative rock, a few native shrubs, clean steel edging. Patio turned out crisp and they've already got the fire pit going.",
+  "photos": [
+    "Finished paver patio with tight joints and a round fire pit in the center, patio furniture staged, Wasatch mountains in the background at golden hour",
+    "Newly planted xeriscape strip along a cedar fence \u2014 decorative rock, a visible drip line, and young native shrubs, steel edging separating it from the lawn"
+  ],
+  "sender": "seeded crew"
+}</pre>
+      </details>
+      <details>
+        <summary style="cursor:pointer;color:#9aa0aa;margin-bottom:8px">Audit log</summary>
+        <pre class="audit-log" data-id="239b8bea545a">click to load…</pre>
+      </details>
+    </div>
+    <div class="actions">
+      <button class="edit" onclick="toggleEdit('239b8bea545a')">Edit</button>
+      <button class="save" style="display:none" onclick="saveEdit('239b8bea545a')">Save edit</button>
+      <span style="flex:1"></span>
+      <button class="reject" onclick="act('239b8bea545a','reject')">Reject</button>
+      <button class="approve" onclick="act('239b8bea545a','approve')">Approve & publish</button>
+    </div>
+  </article>
+  
+  <article class="card" data-id="8a85a35f59fe">
+    <header>
+      <h2>intake to post</h2>
+      <span class="pill published">published</span>
+      <span class="meta">8a85a35f59fe · 2026-06-04T22:46:35.681376Z</span>
+    </header>
+    <div class="body">
+      <div class="meta-line">
+        <span>prompt: <strong>v1</strong></span>
+        <span>model: authored-demo</span>
+        
+      </div>
+
+      
+
+      
+      
+
+      
+      
+
+      
+      
+        <div class="source">
+          
+          
+          <div class="note">
+            <div class="from">FROM seeded crew </div>
+            “Knocked out a spring start-up in Sandy this morning. Found two cracked heads on the park strip and a leaking valve in the back zone — swapped them out, reset the controller, and walked every zone. Whole system's running clean now and the lawn's already looking happier.”
+          </div>
+          
+        </div>
+      
+
+      
+      
+        <div class="channels">
+          
+            
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">gbp</span>
+                
+                <span class="ch-len">447 chars</span>
+              </div>
+              
+              <div class="ch-body">Sprinkler season is here, and we were out in Sandy this morning getting a system back online. Found a couple of cracked heads on the park strip and a leaking valve out back — swapped them, reset the controller, and walked every zone so nothing's wasting water. If your sprinklers haven't been turned on yet this year, now's the time to get them checked before the summer heat hits. We're booking spring start-ups across Sandy and the south valley.</div>
+              
+              <span class="ch-cta">Get a free estimate</span>
+              
+            </div>
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">instagram</span>
+                
+                <span class="ch-len">137 chars</span>
+              </div>
+              
+              <div class="ch-body">Spring start-up season in Sandy ☀️ Two cracked heads and a leaky valve, fixed before lunch. Get your system checked before the heat hits.</div>
+              <div class="ch-tags">#sprinklerrepair #utahlandscaping #saltlakevalley #waterwise #beforeandafter</div>
+              
+              
+            </div>
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">facebook</span>
+                
+                <span class="ch-len">333 chars</span>
+              </div>
+              
+              <div class="ch-body">Sandy, your sprinklers are ready to wake up. 🌱 We knocked out a spring start-up this morning — two cracked heads and a leaky valve fixed, controller reset, every zone checked for coverage. A quick tune-up now saves you from brown spots (and surprise water bills) all summer long. Booking start-ups across the valley — give us a call.</div>
+              
+              
+              
+            </div>
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">blog</span>
+                
+                <span class="ch-len">802 chars</span>
+              </div>
+              <div class="ch-title">Spring Sprinkler Start-Up in Sandy: What to Check Before the First Hot Week</div>
+              <div class="ch-body">If you live in Sandy or anywhere along the Salt Lake valley, the few weeks before summer are the best time to get your sprinkler system checked. Pipes that sat through a Utah winter can crack, valves can stick, and heads get knocked out of alignment over the off-season — and you usually don't notice until you've got a brown patch or a water bill that doubled overnight.
+
+A proper spring start-up is more than just turning the water on. We slowly pressurize the system to avoid water hammer, walk every zone to check spray patterns and coverage, replace cracked or tilted heads, check valves and the backflow assembly, and set the controller for the season so you're not watering at noon in July. Twenty minutes of attention in spring prevents most of the emergency calls we get in the heat of summer.</div>
+              
+              
+              
+                <div class="ch-faq">3 FAQs · expand below for full</div>
+              
+            </div>
+            
+          
+            
+            
+            <div class="channel">
+              <div class="ch-head">
+                <span class="ch-name">newsletter</span>
+                
+                <span class="ch-len">287 chars</span>
+              </div>
+              
+              <div class="ch-body">Spring start-up season is officially rolling. The crew kicked it off in Sandy this week — a couple of winter-cracked heads and a leaky valve, handled. Reminder to send the 'time to wake up your sprinklers' note to last year's customers; the calendar fills up fast once the weather turns.</div>
+              
+              
+              
+            </div>
+            
+          
+        </div>
+      
+
+      <button class="toggle-raw" onclick="toggleRaw('8a85a35f59fe')">Show raw JSON / edit</button>
+      <div class="output-view-raw" style="display:none;margin-top:12px">
+        <pre>{
+  "division": "irrigation",
+  "gbp": {
+    "post": "Sprinkler season is here, and we were out in Sandy this morning getting a system back online. Found a couple of cracked heads on the park strip and a leaking valve out back \u2014 swapped them, reset the controller, and walked every zone so nothing's wasting water. If your sprinklers haven't been turned on yet this year, now's the time to get them checked before the summer heat hits. We're booking spring start-ups across Sandy and the south valley.",
+    "cta": "Get a free estimate"
+  },
+  "facebook": {
+    "post": "Sandy, your sprinklers are ready to wake up. \ud83c\udf31 We knocked out a spring start-up this morning \u2014 two cracked heads and a leaky valve fixed, controller reset, every zone checked for coverage. A quick tune-up now saves you from brown spots (and surprise water bills) all summer long. Booking start-ups across the valley \u2014 give us a call."
+  },
+  "instagram": {
+    "caption": "Spring start-up season in Sandy \u2600\ufe0f Two cracked heads and a leaky valve, fixed before lunch. Get your system checked before the heat hits.",
+    "hashtags": [
+      "#sprinklerrepair",
+      "#utahlandscaping",
+      "#saltlakevalley",
+      "#waterwise",
+      "#beforeandafter"
+    ]
+  },
+  "blog": {
+    "title": "Spring Sprinkler Start-Up in Sandy: What to Check Before the First Hot Week",
+    "body": "If you live in Sandy or anywhere along the Salt Lake valley, the few weeks before summer are the best time to get your sprinkler system checked. Pipes that sat through a Utah winter can crack, valves can stick, and heads get knocked out of alignment over the off-season \u2014 and you usually don't notice until you've got a brown patch or a water bill that doubled overnight.\n\nA proper spring start-up is more than just turning the water on. We slowly pressurize the system to avoid water hammer, walk every zone to check spray patterns and coverage, replace cracked or tilted heads, check valves and the backflow assembly, and set the controller for the season so you're not watering at noon in July. Twenty minutes of attention in spring prevents most of the emergency calls we get in the heat of summer.",
+    "faq": [
+      {
+        "q": "When should I turn my sprinklers on in Utah?",
+        "a": "Usually mid-to-late spring, once the overnight lows are reliably above freezing. In the Salt Lake valley that's typically April into May. Starting up too early risks a freeze cracking a line."
+      },
+      {
+        "q": "What's included in a spring start-up?",
+        "a": "We pressurize the system safely, check every zone for coverage, replace broken or misaligned heads, inspect valves and backflow, and program the controller for efficient, water-wise watering."
+      },
+      {
+        "q": "Do you repair systems you didn't install?",
+        "a": "Absolutely \u2014 most of the systems we service we didn't install. We work on every common brand of head, valve, and controller."
+      }
+    ]
+  },
+  "newsletter": {
+    "blurb": "Spring start-up season is officially rolling. The crew kicked it off in Sandy this week \u2014 a couple of winter-cracked heads and a leaky valve, handled. Reminder to send the 'time to wake up your sprinklers' note to last year's customers; the calendar fills up fast once the weather turns."
+  }
+}</pre>
+      </div>
+      <textarea class="output-edit" style="display:none;margin-top:12px">{
+  "division": "irrigation",
+  "gbp": {
+    "post": "Sprinkler season is here, and we were out in Sandy this morning getting a system back online. Found a couple of cracked heads on the park strip and a leaking valve out back \u2014 swapped them, reset the controller, and walked every zone so nothing's wasting water. If your sprinklers haven't been turned on yet this year, now's the time to get them checked before the summer heat hits. We're booking spring start-ups across Sandy and the south valley.",
+    "cta": "Get a free estimate"
+  },
+  "facebook": {
+    "post": "Sandy, your sprinklers are ready to wake up. \ud83c\udf31 We knocked out a spring start-up this morning \u2014 two cracked heads and a leaky valve fixed, controller reset, every zone checked for coverage. A quick tune-up now saves you from brown spots (and surprise water bills) all summer long. Booking start-ups across the valley \u2014 give us a call."
+  },
+  "instagram": {
+    "caption": "Spring start-up season in Sandy \u2600\ufe0f Two cracked heads and a leaky valve, fixed before lunch. Get your system checked before the heat hits.",
+    "hashtags": [
+      "#sprinklerrepair",
+      "#utahlandscaping",
+      "#saltlakevalley",
+      "#waterwise",
+      "#beforeandafter"
+    ]
+  },
+  "blog": {
+    "title": "Spring Sprinkler Start-Up in Sandy: What to Check Before the First Hot Week",
+    "body": "If you live in Sandy or anywhere along the Salt Lake valley, the few weeks before summer are the best time to get your sprinkler system checked. Pipes that sat through a Utah winter can crack, valves can stick, and heads get knocked out of alignment over the off-season \u2014 and you usually don't notice until you've got a brown patch or a water bill that doubled overnight.\n\nA proper spring start-up is more than just turning the water on. We slowly pressurize the system to avoid water hammer, walk every zone to check spray patterns and coverage, replace cracked or tilted heads, check valves and the backflow assembly, and set the controller for the season so you're not watering at noon in July. Twenty minutes of attention in spring prevents most of the emergency calls we get in the heat of summer.",
+    "faq": [
+      {
+        "q": "When should I turn my sprinklers on in Utah?",
+        "a": "Usually mid-to-late spring, once the overnight lows are reliably above freezing. In the Salt Lake valley that's typically April into May. Starting up too early risks a freeze cracking a line."
+      },
+      {
+        "q": "What's included in a spring start-up?",
+        "a": "We pressurize the system safely, check every zone for coverage, replace broken or misaligned heads, inspect valves and backflow, and program the controller for efficient, water-wise watering."
+      },
+      {
+        "q": "Do you repair systems you didn't install?",
+        "a": "Absolutely \u2014 most of the systems we service we didn't install. We work on every common brand of head, valve, and controller."
+      }
+    ]
+  },
+  "newsletter": {
+    "blurb": "Spring start-up season is officially rolling. The crew kicked it off in Sandy this week \u2014 a couple of winter-cracked heads and a leaky valve, handled. Reminder to send the 'time to wake up your sprinklers' note to last year's customers; the calendar fills up fast once the weather turns."
+  }
+}</textarea>
+
+      <details style="margin-top:14px">
+        <summary style="cursor:pointer;color:#9aa0aa;margin-bottom:8px">Input payload</summary>
+        <pre>{
+  "subject": "Sandy \u2014 Spring Start-Up + Repair",
+  "location": "Sandy, Salt Lake County",
+  "division_hint": "irrigation",
+  "note": "Knocked out a spring start-up in Sandy this morning. Found two cracked heads on the park strip and a leaking valve in the back zone \u2014 swapped them out, reset the controller, and walked every zone. Whole system's running clean now and the lawn's already looking happier.",
+  "photos": [
+    "Technician kneeling at an open valve box adjusting a sprinkler valve, healthy green lawn and a brick home behind him, morning light",
+    "A freshly replaced pop-up sprinkler head throwing an even spray pattern across a tidy front lawn, water droplets catching the sun"
+  ],
+  "sender": "seeded crew"
+}</pre>
+      </details>
+      <details>
+        <summary style="cursor:pointer;color:#9aa0aa;margin-bottom:8px">Audit log</summary>
+        <pre class="audit-log" data-id="8a85a35f59fe">click to load…</pre>
+      </details>
+    </div>
+    <div class="actions">
+      <button class="edit" onclick="toggleEdit('8a85a35f59fe')">Edit</button>
+      <button class="save" style="display:none" onclick="saveEdit('8a85a35f59fe')">Save edit</button>
+      <span style="flex:1"></span>
+      <button class="reject" onclick="act('8a85a35f59fe','reject')">Reject</button>
+      <button class="approve" onclick="act('8a85a35f59fe','approve')">Approve & publish</button>
+    </div>
+  </article>
+  
+</main>
+
+</body>
+</html>

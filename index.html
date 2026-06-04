@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>The Lawn &amp; Sprinkler Guys — Marketing Engine Proposal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!--
+    NOTE ON "NO DOWNLOAD" PROTECTION:
+    There is intentionally NO PDF and NO download button. The deterrents below
+    (disabled right-click / selection / copy / print / save shortcuts + watermark)
+    stop casual copy-paste and printing. They CANNOT stop a screenshot or someone
+    opening browser dev tools / view-source — that's impossible client-side.
+    For stronger control, gate this behind a password or an expiring private link.
+  -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #F6F8F4;
+      --surface:   #FFFFFF;
+      --ink:       #1C2B23;
+      --muted:     #5C6B61;
+      --faint:     #9AA89E;
+      --line:      #E2E8DD;
+      --green:     #2D6A4F;
+      --green-dk:  #1B4332;
+      --green-lt:  #74C69D;
+      --leaf:      #40916C;
+      --sand:      #EFEADD;
+      --sun:       #E9A23B;
+      --shadow:    0 18px 40px rgba(27,67,50,0.10);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      /* copy deterrent */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
+
+    h1, h2, h3, .display { font-family: 'Poppins', sans-serif; }
+
+    /* ── WATERMARK (repeating, behind content) ── */
+    .watermark {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.05;
+      background-image: repeating-linear-gradient(
+        -30deg,
+        transparent 0, transparent 180px,
+        rgba(27,67,50,0.0) 180px
+      );
+    }
+    .watermark::before {
+      content: "THE LASG · CONFIDENTIAL · THE LASG · CONFIDENTIAL · THE LASG · CONFIDENTIAL · THE LASG · CONFIDENTIAL · THE LASG · CONFIDENTIAL · THE LASG · CONFIDENTIAL · THE LASG · CONFIDENTIAL · THE LASG · CONFIDENTIAL · THE LASG · CONFIDENTIAL · THE LASG · CONFIDENTIAL · THE LASG · CONFIDENTIAL · THE LASG · CONFIDENTIAL ";
+      position: absolute;
+      top: 0; left: -20%;
+      width: 140%;
+      height: 200%;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: 0.3em;
+      line-height: 4.2;
+      color: var(--green-dk);
+      transform: rotate(-30deg);
+      word-spacing: 0.4em;
+      white-space: normal;
+    }
+    .wrap { position: relative; z-index: 1; }
+
+    /* ── HEADER ── */
+    .site-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(246,248,244,0.9);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+      padding: 0 40px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .wordmark { display: flex; align-items: center; gap: 10px; font-family: 'Poppins'; font-weight: 700; font-size: 15px; color: var(--green-dk); }
+    .wordmark .leaf { width: 22px; height: 22px; }
+    .nav-links { display: flex; gap: 26px; }
+    .nav-links a { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color .18s; }
+    .nav-links a:hover { color: var(--green); }
+    .badge { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); border: 1px solid var(--green-lt); background: rgba(116,198,156,0.12); padding: 5px 12px; border-radius: 100px; }
+
+    .section { max-width: 1040px; margin: 0 auto; padding: 0 40px; }
+
+    /* ── HERO ── */
+    .hero { padding: 92px 40px 64px; max-width: 1040px; margin: 0 auto; }
+    .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--leaf); margin-bottom: 22px; display: flex; align-items: center; gap: 12px; }
+    .eyebrow::before { content:''; width: 30px; height: 2px; background: var(--green-lt); border-radius: 2px; }
+    .hero h1 { font-size: clamp(38px, 6.5vw, 68px); font-weight: 800; line-height: 1.04; letter-spacing: -0.01em; color: var(--green-dk); margin-bottom: 24px; }
+    .hero h1 em { font-style: normal; color: var(--leaf); }
+    .hero-sub { font-size: 19px; color: var(--muted); max-width: 660px; line-height: 1.6; }
+    .hero-meta { display: flex; gap: 36px; flex-wrap: wrap; margin-top: 34px; padding-top: 26px; border-top: 1px solid var(--line); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--faint); }
+    .hero-meta b { display: block; color: var(--ink); font-size: 13px; margin-top: 3px; letter-spacing: 0; text-transform: none; }
+
+    /* ── ONE-LINER BANNER ── */
+    .banner { background: linear-gradient(120deg, var(--green-dk), var(--green)); color: #EAF6EF; }
+    .banner .section { padding-top: 48px; padding-bottom: 48px; }
+    .banner .lead { font-family: 'Poppins'; font-weight: 600; font-size: clamp(20px, 3vw, 27px); line-height: 1.4; }
+    .banner .lead strong { color: #FFFFFF; }
+    .banner .pills { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+    .banner .pill { font-size: 13px; font-weight: 600; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); padding: 7px 14px; border-radius: 100px; }
+
+    /* ── SECTION HEADINGS ── */
+    .sec { padding: 72px 0 8px; }
+    .sec-label { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--leaf); margin-bottom: 14px; }
+    .sec h2 { font-size: clamp(28px, 4.4vw, 40px); font-weight: 800; line-height: 1.1; color: var(--green-dk); margin-bottom: 18px; letter-spacing: -0.01em; }
+    .sec p.intro { font-size: 17px; color: var(--muted); max-width: 760px; }
+
+    /* ── TODAY: honest look ── */
+    .scan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 16px; margin-top: 30px; }
+    .scan { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px; box-shadow: var(--shadow); }
+    .scan .tag { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 10px; display: inline-flex; align-items: center; gap: 7px; }
+    .scan.good .tag { color: var(--leaf); }
+    .scan.warn .tag { color: var(--sun); }
+    .scan .tag .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+    .scan p { font-size: 14.5px; color: var(--muted); }
+    .scan b { color: var(--ink); }
+
+    /* ── 5 PIECES ── */
+    .pieces { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 18px; margin-top: 30px; }
+    .piece { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 26px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+    .piece::before { content:''; position: absolute; left:0; top:0; bottom:0; width: 4px; background: var(--green-lt); }
+    .piece .ico { width: 42px; height: 42px; border-radius: 10px; background: rgba(64,145,108,0.12); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+    .piece .ico svg { width: 22px; height: 22px; stroke: var(--green); fill: none; stroke-width: 1.9; }
+    .piece h3 { font-size: 18px; font-weight: 700; color: var(--green-dk); margin-bottom: 8px; }
+    .piece p { font-size: 14.5px; color: var(--muted); }
+
+    /* ── 60-SECOND LOOP ── */
+    .loop { background: var(--sand); }
+    .loop .section { padding-top: 64px; padding-bottom: 64px; }
+    .loop-flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 14px; margin-top: 30px; counter-reset: step; }
+    .step { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px; position: relative; }
+    .step .n { font-family: 'Poppins'; font-weight: 800; font-size: 13px; color: #fff; background: var(--green); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+    .step h4 { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+    .step p { font-size: 13.5px; color: var(--muted); }
+    .loop-note { margin-top: 24px; font-size: 15px; color: var(--green-dk); font-weight: 600; }
+
+    /* ── COMPARE TABLE ── */
+    .compare { width: 100%; border-collapse: collapse; margin-top: 28px; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); font-size: 14.5px; }
+    .compare th, .compare td { padding: 15px 18px; text-align: left; border-bottom: 1px solid var(--line); }
+    .compare thead th { font-family: 'Poppins'; font-size: 13px; background: var(--green-dk); color: #EAF6EF; }
+    .compare thead th.us { background: var(--green); }
+    .compare td:first-child { font-weight: 600; color: var(--ink); }
+    .compare td.us { background: rgba(116,198,156,0.10); font-weight: 600; color: var(--green-dk); }
+    .compare tr:last-child td { border-bottom: none; }
+
+    /* ── PRICING ── */
+    .pricing { background: linear-gradient(160deg, var(--green-dk), #14352a); color: #EAF6EF; }
+    .pricing .section { padding-top: 72px; padding-bottom: 72px; }
+    .pricing h2 { color: #fff; }
+    .pricing .sec-label { color: var(--green-lt); }
+    .price-cards { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; margin-top: 30px; }
+    .pcard { border-radius: 16px; padding: 30px; }
+    .pcard.standard { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); }
+    .pcard.founding { background: #FFFFFF; color: var(--ink); border: 2px solid var(--green-lt); box-shadow: 0 20px 50px rgba(0,0,0,0.3); position: relative; }
+    .pcard .ribbon { position: absolute; top: 18px; right: 18px; background: var(--sun); color: #3a2a07; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 12px; border-radius: 100px; }
+    .pcard .ptitle { font-family: 'Poppins'; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.85; margin-bottom: 12px; }
+    .pcard.founding .ptitle { color: var(--leaf); opacity: 1; }
+    .pcard .amt { font-family: 'Poppins'; font-weight: 800; font-size: 46px; line-height: 1; }
+    .pcard .amt small { font-size: 16px; font-weight: 600; opacity: 0.7; }
+    .pcard .sub { font-size: 14px; margin-top: 10px; opacity: 0.85; }
+    .pcard ul { list-style: none; margin-top: 18px; display: flex; flex-direction: column; gap: 9px; }
+    .pcard li { font-size: 14px; padding-left: 24px; position: relative; }
+    .pcard li::before { content:'✓'; position: absolute; left: 0; color: var(--leaf); font-weight: 800; }
+    .pcard.standard li::before { color: var(--green-lt); }
+    .exchange { margin-top: 26px; font-size: 14.5px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); border-radius: 12px; padding: 18px 20px; }
+    .exchange b { color: #fff; }
+
+    /* ── 90-DAY ── */
+    .goals { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 14px; margin-top: 28px; }
+    .goal { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; font-size: 14.5px; color: var(--muted); display: flex; gap: 12px; align-items: flex-start; box-shadow: var(--shadow); }
+    .goal .chk { color: var(--leaf); font-weight: 800; flex-shrink: 0; }
+    .goal b { color: var(--ink); }
+
+    /* ── CTA / CONTACT ── */
+    .cta { text-align: center; padding: 80px 40px; }
+    .cta h2 { font-size: clamp(28px, 4.5vw, 42px); color: var(--green-dk); margin-bottom: 16px; }
+    .cta p { font-size: 18px; color: var(--muted); max-width: 580px; margin: 0 auto 30px; }
+    .cta .btn { display: inline-flex; align-items: center; gap: 10px; background: var(--green); color: #fff; font-family: 'Poppins'; font-weight: 700; font-size: 15px; padding: 16px 30px; border-radius: 100px; text-decoration: none; transition: transform .18s, background .18s; box-shadow: var(--shadow); }
+    .cta .btn:hover { background: var(--green-dk); transform: translateY(-2px); }
+    .cta .contact { margin-top: 24px; font-size: 15px; color: var(--muted); }
+    .cta .contact b { color: var(--ink); }
+
+    /* ── FOOTER ── */
+    .site-footer { border-top: 1px solid var(--line); padding: 34px 40px; display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--faint); }
+    .site-footer b { color: var(--muted); }
+
+    @media (max-width: 760px) {
+      .site-header { padding: 0 20px; } .nav-links { display: none; }
+      .hero { padding: 56px 22px 48px; } .section { padding: 0 22px; }
+      .price-cards { grid-template-columns: 1fr; }
+      .compare { font-size: 13px; } .compare th, .compare td { padding: 11px 12px; }
+    }
+    @media print { html, body { display: none !important; } }
+  </style>
+</head>
+<body oncontextmenu="return false" ondragstart="return false" oncopy="return false" oncut="return false">
+
+  <div class="watermark" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <!-- HEADER -->
+    <header class="site-header">
+      <div class="wordmark">
+        <svg class="leaf" viewBox="0 0 24 24" fill="none" stroke="#2D6A4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 5-9 13-10 0 8-3 14-6 17z"/><path d="M4 21c2-6 6-9 11-11"/></svg>
+        The Lawn &amp; Sprinkler Guys
+      </div>
+      <nav class="nav-links">
+        <a href="#today">The Opportunity</a>
+        <a href="#install">What We Install</a>
+        <a href="#how">How It Works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#start">Get Started</a>
+        <a href="demo/index.html" style="color:var(--leaf)">▶ See It Live</a>
+      </nav>
+      <div class="badge">Confidential · June 2026</div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="eyebrow">A Marketing Engine for The LASG</div>
+      <h1>Get found on Google.<br/>Keep your site current.<br/><em>Without an agency.</em></h1>
+      <p class="hero-sub">A simple, AI-driven marketing engine that turns one photo from a finished job into a Google post, a Facebook/Instagram post, and a website update — in your voice, approved by you in one tap — while we build the local SEO that gets Salt Lake homeowners to find you.</p>
+      <div class="hero-meta">
+        <div>Prepared for<b>The Lawn &amp; Sprinkler Guys</b></div>
+        <div>Market<b>Salt Lake City &amp; Northern Utah</b></div>
+        <div>Date<b>June 2026</b></div>
+        <div>Status<b>For Review</b></div>
+      </div>
+    </section>
+
+    <!-- ONE-LINER BANNER -->
+    <section class="banner">
+      <div class="section">
+        <div class="sec-label" style="color:var(--green-lt);margin-bottom:14px;">The one-line version</div>
+        <p class="lead">One photo from a finished job becomes a Google post, a Facebook/Instagram post, and a website update — <strong>in your voice, approved in one tap.</strong> Flat monthly fee. You approve everything. <strong>Cancel anytime.</strong></p>
+        <div class="pills">
+          <span class="pill">Local SEO</span>
+          <span class="pill">AI-assisted WordPress</span>
+          <span class="pill">Text-a-photo content</span>
+          <span class="pill">Google reviews</span>
+          <span class="pill">Social on autopilot</span>
+          <span class="pill">No photography needed</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- TODAY -->
+    <section id="today" class="section sec">
+      <div class="sec-label">Where you are today — an honest look</div>
+      <h2>A solid foundation that isn't working hard enough yet</h2>
+      <p class="intro">We scanned thelasg.com. Here's the straight read — the good and the gaps.</p>
+      <div class="scan-grid">
+        <div class="scan good"><div class="tag"><span class="dot"></span>Strong base</div><p>Clean WordPress site, a clear service list (landscaping + sprinklers), and a real phone number. Good bones to build on.</p></div>
+        <div class="scan warn"><div class="tag"><span class="dot"></span>Content unfinished</div><p>The site still says <b>"while we're still finalizing our content."</b> Google has little to index, so you're hard to find.</p></div>
+        <div class="scan warn"><div class="tag"><span class="dot"></span>No local SEO footprint</div><p>No city-specific pages. When a homeowner in <b>Draper or Sandy</b> googles "sprinkler repair near me," competitors show up — not you.</p></div>
+        <div class="scan warn"><div class="tag"><span class="dot"></span>Quiet between jobs</div><p>Nothing consistently feeds Google, Facebook, or Instagram, so your presence goes silent right when homeowners are searching.</p></div>
+      </div>
+      <p class="intro" style="margin-top:26px;"><b style="color:var(--green-dk)">The opportunity:</b> homeowners across the valley search every week for exactly what you do — sprinkler repair, fall blowouts, backflow testing, water-wise / xeriscape conversions. Water-wise landscaping is booming in Utah. Right now that traffic goes to whoever shows up first on Google. <b style="color:var(--green-dk)">We make that you.</b></p>
+    </section>
+
+    <!-- INSTALL -->
+    <section id="install" class="section sec">
+      <div class="sec-label">What we install — the five pieces</div>
+      <h2>One engine, five working parts</h2>
+      <div class="pieces">
+        <div class="piece"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><h3>1 · Local SEO Foundation</h3><p>We optimize your Google Business Profile, build a page for every city you serve, add the markup Google looks for, and make your name/address/phone consistent everywhere. This is what moves you up in "near me" searches and the map pack.</p></div>
+        <div class="piece"><div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M8 21h8"/></svg></div><h3>2 · AI-Assisted Website</h3><p>We finish and clean up your WordPress site, then tie AI into it so updates are easy. New job to show off? New service? It goes live without you wrestling with WordPress.</p></div>
+        <div class="piece"><div class="ico"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><h3>3 · Content Engine</h3><p>Your crew texts a photo from a finished job. The engine writes the posts for you — Google, Facebook, Instagram, and a short website update. You approve. It publishes.</p></div>
+        <div class="piece"><div class="ico"><svg viewBox="0 0 24 24"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg></div><h3>4 · Reputation</h3><p>When a Google review comes in, we draft a reply in your voice and you approve it. We also help you steadily earn more reviews — the single biggest lever for local ranking.</p></div>
+        <div class="piece"><div class="ico"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div><h3>5 · Consistent Social</h3><p>Google, Facebook, and Instagram stay active on a steady cadence — even in your busy season, when posting is the last thing you have time for.</p></div>
+        <div class="piece" style="background:var(--sand);"><div class="ico" style="background:rgba(233,162,59,0.15);"><svg viewBox="0 0 24 24" stroke="#E9A23B"><path d="M20 6L9 17l-5-5"/></svg></div><h3>No photography needed</h3><p>Your crew's phone photos are all it takes. No photo shoots, no production days — just the pictures you'd snap anyway.</p></div>
+      </div>
+    </section>
+
+    <!-- HOW -->
+    <section id="how" class="loop">
+      <div class="section sec" style="padding-top:0;">
+        <div class="sec-label">How it actually works</div>
+        <h2>The 60-second loop</h2>
+        <p class="intro">Your crew finishes a paver patio with a water-wise strip in Draper. Here's what happens next.</p>
+        <div class="loop-flow">
+          <div class="step"><div class="n">1</div><h4>Snap &amp; text</h4><p>The foreman texts 3 phone photos + one sentence: "new paver patio in Draper, added a drip line and xeriscape strip."</p></div>
+          <div class="step"><div class="n">2</div><h4>Engine writes</h4><p>About a minute later: a Google post, a Facebook/Instagram caption, and a website update — already written in your voice.</p></div>
+          <div class="step"><div class="n">3</div><h4>You approve</h4><p>You open one screen on your phone, tweak a word if you want, and tap Approve. Nothing posts that you didn't see.</p></div>
+          <div class="step"><div class="n">4</div><h4>It publishes</h4><p>It posts everywhere — and your website updates itself. Total time: under a minute.</p></div>
+        </div>
+        <p class="loop-note">The engine does the writing. You keep the final say.</p>
+      </div>
+    </section>
+
+    <!-- COMPARE -->
+    <section class="section sec">
+      <div class="sec-label">Why this beats the alternatives</div>
+      <h2>Not agency labor — a system that works for you</h2>
+      <table class="compare">
+        <thead><tr><th></th><th>Hire an agency</th><th>Do it yourself</th><th class="us">The LASG Engine</th></tr></thead>
+        <tbody>
+          <tr><td>Cost</td><td>$1,500–3,000/mo</td><td>"free" (your time)</td><td class="us">Flat, affordable monthly</td></tr>
+          <tr><td>Posts in your voice</td><td>Generic</td><td>When you have time</td><td class="us">Yes, every time</td></tr>
+          <tr><td>Keeps up in busy season</td><td>Maybe</td><td>No</td><td class="us">Yes — runs on a text</td></tr>
+          <tr><td>Local SEO built in</td><td>Add-on</td><td>No</td><td class="us">Yes</td></tr>
+          <tr><td>You stay in control</td><td>No</td><td>Yes</td><td class="us">Yes — you approve everything</td></tr>
+          <tr><td>Tied into your website</td><td>Rarely</td><td>—</td><td class="us">Yes — AI built into WordPress</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing" class="pricing">
+      <div class="section sec" style="padding-top:0;">
+        <div class="sec-label">What it costs</div>
+        <h2>Simple and monthly. Cancel anytime.</h2>
+        <div class="price-cards">
+          <div class="pcard standard">
+            <div class="ptitle">Standard</div>
+            <div class="amt">$399<small>/mo</small></div>
+            <div class="sub">Setup $500 (one-time)</div>
+            <ul>
+              <li>Local SEO + new city pages monthly</li>
+              <li>Text-a-photo content engine</li>
+              <li>Google review replies</li>
+              <li>Consistent social posting</li>
+              <li>Ongoing WordPress upkeep</li>
+              <li>Monthly report</li>
+            </ul>
+          </div>
+          <div class="pcard founding">
+            <div class="ribbon">Your founding rate</div>
+            <div class="ptitle">Founding Client</div>
+            <div class="amt">$199<small>/mo · locked 90 days</small></div>
+            <div class="sub"><b>Setup waived.</b> Then $399/mo standard after 90 days — only if you're happy with the results.</div>
+            <ul>
+              <li>Everything in Standard</li>
+              <li>No setup fee</li>
+              <li>Rate locked for your first 90 days</li>
+              <li>Cancel anytime, owe nothing beyond the month you're in</li>
+              <li>You own your content &amp; pages</li>
+            </ul>
+          </div>
+        </div>
+        <div class="exchange">You'd be the <b>first local business on this system</b>, so we make it easy to say yes. In exchange — <b>if you're happy</b> — we'd simply ask for a short testimonial, permission to use your results as a case study, and an intro or two to others who could use the same thing.</div>
+      </div>
+    </section>
+
+    <!-- 90 DAY -->
+    <section class="section sec">
+      <div class="sec-label">What we'll aim for in your first 90 days</div>
+      <h2>So we both know what "working" looks like</h2>
+      <div class="goals">
+        <div class="goal"><span class="chk">✓</span><div><b>Google Business Profile</b> claimed, verified, and optimized</div></div>
+        <div class="goal"><span class="chk">✓</span><div>A <b>measurable bump in your Google reviews</b></div></div>
+        <div class="goal"><span class="chk">✓</span><div>Ranking in the local <b>"map pack"</b> for "sprinkler repair" + your city</div></div>
+        <div class="goal"><span class="chk">✓</span><div>Your first <b>city / service-area pages</b> live and indexed on Google</div></div>
+        <div class="goal"><span class="chk">✓</span><div>A <b>steady stream of approved posts</b> — without you lifting a finger</div></div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="start" class="cta">
+      <div class="eyebrow" style="justify-content:center;">The honest promise</div>
+      <h2>You're the name Google shows them</h2>
+      <p>This isn't "AI spam your customers." Every post is in <b>your</b> voice, about <b>your</b> real jobs, and <b>you</b> approve it before it goes anywhere. When a homeowner needs a sprinkler fixed or a yard redone, you show up — and your site finally tells your story.</p>
+      <a class="btn" href="mailto:hello@example.com?subject=The%20LASG%20Marketing%20Engine">Let's set up a quick call &rarr;</a>
+      <a class="btn" style="background:var(--green-dk);margin-left:10px" href="demo/index.html">▶ See the live demo</a>
+      <div class="contact">Or reach out directly — <b>[Your name]</b> · [phone] · [email]</div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div>Prepared for <b>The Lawn &amp; Sprinkler Guys</b> · Confidential — for client review only.<br/>&copy; 2026 Coolnerd, LLC</div>
+      <div>June 2026</div>
+    </footer>
+  </div>
+
+  <script>
+    // Copy / save deterrents. NOT real security — a screenshot or view-source still works.
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('copy',  e => e.preventDefault());
+    document.addEventListener('cut',   e => e.preventDefault());
+    document.addEventListener('dragstart', e => e.preventDefault());
+    document.addEventListener('keydown', function (e) {
+      const k = (e.key || '').toLowerCase();
+      const mod = e.ctrlKey || e.metaKey;
+      // Block Save, Print, Copy/Cut/Select-all, View-source, Find-in-page
+      if (mod && ['s','p','c','x','u','a','f'].includes(k)) { e.preventDefault(); }
+      // Block DevTools shortcuts (best-effort)
+      if (k === 'f12') e.preventDefault();
+      if (mod && e.shiftKey && ['i','j','c'].includes(k)) e.preventDefault();
+    });
+    window.addEventListener('beforeprint', () => { document.body.style.display = 'none'; });
+    window.addEventListener('afterprint',  () => { document.body.style.display = ''; });
+  </script>
+</body>
+</html>
